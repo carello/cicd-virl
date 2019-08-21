@@ -1,0 +1,126 @@
+# Integration Pipeline
+kind: pipeline
+name: cicd-virl
+
+steps:
+# Begin build by checking out the active branch
+- name: BuildStart
+  image: carello/virltest:v10
+  commands:
+    - echo "Starting CI/CD workflow" 
+    - git fetch
+    - git checkout dev
+
+# Start the test network in VIRL
+- name: Integration-StartTestNetwork
+  image: carello/virltest:v10
+  registry: docker.io
+  environment:
+    VIRL_HOST:
+      from_secret: VIRL_HOST
+    VIRL_USERNAME:
+      from_secret: VIRL_USERNAME
+    VIRL_PASSWORD:
+      from_secret: VIRL_PASSWORD
+  commands:
+    - virl up -f virl/topology.virl
+  #action: create 
+  when:
+    branch: dev
+      
+# Deploy the network configuration onto the test network
+- name: Integration-ConfigTestNetwork
+  image: hpreston/drone-ansible-netdevops
+  commands:
+    - cd ansible
+    - . ./ansible_env_test
+    - ansible-playbook --inventory=hosts_test playbooks/site.yaml
+  when:
+    branch: dev
+
+
+# Run network tests to verify operational state
+- name: Integration-RunNetworkTests
+  image: hpreston/drone-ansible-netdevops
+  commands:
+    - cd ansible
+    - . ./ansible_env_prod
+    - ansible-playbook -i hosts_test playbooks/testing-playbook.yml
+  when:
+    branch: dev
+
+
+
+# Destroy the test network
+- name: Integration-DestroyTestNetwork
+  image: carello/virltest:v10
+  environment:
+    VIRL_HOST:
+      from_secret: VIRL_HOST
+    VIRL_USERNAME:
+      from_secret: VIRL_USERNAME
+    VIRL_PASSWORD:
+      from_secret: VIRL_PASSWORD
+  commands:
+    - virl down
+  when:
+    branch: dev
+    status: [ success, failure]
+       
+
+
+# Merge successful changes to master
+- name: Delivery-MergeToMaster
+  image: carello/virltest:v10
+  environment:
+    GIT_AUTHOR_NAME: ${CI_COMMIT_AUTHOR_NAME=drone}
+    GIT_AUTHOR_EMAIL: ${CI_COMMIT_AUTHOR_EMAIL=drone@localhsot}
+    GIT_COMMITTER_NAME: carello
+    GIT_COMMITTER_EMAIL: cp2carello@gmail.com
+    GOGS_USER:
+      from_secret: GOGS_USER
+    GOGS_PASS:
+      from_secret: GOGS_PASS
+  commands:
+    - git checkout master
+    - git branch -u origin/master
+    - git merge dev
+    - git push http://$GOGS_USER:$GOGS_PASS@dc-gogs:3000/carello/network_cicd_lab.git
+  when:
+    branch: dev
+
+# For "master" deploy changes to production
+#   Deployment-ConfigProdNetwork:
+#     image: hpreston/drone-ansible-netdevops
+#     commands:
+#       - cd ansible
+#       - . ./ansible_env_prod
+#       - ansible-playbook -i hosts_prod playbooks/site.yaml
+#     when:
+#       branch: master
+
+# For "master" run network tests to verify operational state
+#   Deployment-RunNetworkTests:
+#     image: hpreston/drone-ansible-netdevops
+#     commands:
+#       - cd ansible
+#       - . ./ansible_env_prod
+#       - ansible-playbook -i hosts_prod playbooks/testing-playbook.yml
+#     when:
+#       branch: master
+
+
+# Notification Phase to send status messages after builds (not working 100%)
+- name: SparkNotify
+  image: hpreston/drone-spark:0.7
+  environment:
+    SPARK_TOKEN:
+      from_secret: SPARK_TOKEN
+    PERSONEMAIL:
+      from_secret: PERSONEMAIL
+    #message: "Build Done!"
+  #secrets: [ SPARK_TOKEN, PERSONEMAIL ]
+  message: "Build Done!"
+  when:
+    status: [ success, failure ]
+

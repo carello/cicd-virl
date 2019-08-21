@@ -1,0 +1,7 @@
+[all:vars]
+ansible_python_interpreter="/usr/bin/env python"
+
+[core]
+172.16.30.201
+172.16.30.202
+172.16.30.203
