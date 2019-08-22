@@ -3,7 +3,7 @@
 
 ### Overview
 
-This application is a CI/CD case study using Cisco VIRL simulator, DRONE and GOGS. Images are pulled from hub.docker.com. This case study doesn't cover installing or configuring VIRL.  There are many ways to set up management access into VIRL. I set up a Shared Flat Network toplogy to allow Ansible access to the virtual devices within VIRL. This can be accomplished through simple routing or using an OpenVPN connection. Documentation can ge found at [here](http://virl.cisco.com). This app was developed on MAC OS X.
+This application is a CI/CD case study using Cisco VIRL simulator, DRONE and GOGS. Images are pulled from hub.docker.com. This case study doesn't cover installing or configuring VIRL.  There are many ways to set up management access into VIRL. I set up a Shared Flat Network toplogy to allow Ansible access to the virtual devices within VIRL. This can be accomplished through simple routing or using an OpenVPN connection. Documentation can be found at [here](http://virl.cisco.com). This app was developed on MAC OS X.
 
 ### Software (prerequisites)
 You'll need to following software installed:
@@ -132,4 +132,4 @@ You'll need to following software installed:
 
 ### To Do
 - Create a robust/flexible app within the drone plugins and not rely on 'commands' within the .drone.yml file. This would allow for more flexible use cases in the future.
-- Webex BOT isn't working accurately.
+- Webex BOT isn't working accurately due to drone plugin compatibility.
