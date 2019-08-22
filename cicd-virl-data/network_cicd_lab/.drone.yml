@@ -30,7 +30,7 @@ steps:
       
 # Deploy the network configuration onto the test network
 - name: Integration-ConfigTestNetwork
-  image: hpreston/drone-ansible-netdevops
+  image: carello/devops:v2
   commands:
     - cd ansible
     - . ./ansible_env_test
@@ -41,7 +41,7 @@ steps:
 
 # Run network tests to verify operational state
 - name: Integration-RunNetworkTests
-  image: hpreston/drone-ansible-netdevops
+  image: carello/devops:v2
   commands:
     - cd ansible
     - . ./ansible_env_prod

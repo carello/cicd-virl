@@ -131,4 +131,5 @@ You'll need to following software installed:
 - enter: `./cleanup.sh`
 
 ### To Do
-Create a robust/flexible app within the drone plugins and not rely on 'commands' within the .drone.yml file. This would allow for more flexible use cases in the future.
+- Create a robust/flexible app within the drone plugins and not rely on 'commands' within the .drone.yml file. This would allow for more flexible use cases in the future.
+- Webex BOT isn't working accurately.
