@@ -112,15 +112,13 @@ steps:
 
 # Notification Phase to send status messages after builds (not working 100%)
 - name: SparkNotify
-  image: hpreston/drone-spark:0.7
+  image: carello/spark:v1.1
   environment:
     SPARK_TOKEN:
       from_secret: SPARK_TOKEN
     PERSONEMAIL:
       from_secret: PERSONEMAIL
-    #message: "Build Done!"
-  #secrets: [ SPARK_TOKEN, PERSONEMAIL ]
-  message: "Build Done!"
+    CI_COMMIT_MESSAGE: "Very good Batman!!!"
   when:
     status: [ success, failure ]
 
